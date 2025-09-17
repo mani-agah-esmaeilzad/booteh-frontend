@@ -33,12 +33,12 @@ const Index = () => {
             مسیر ارزیابی و توسعه
             <br />
             <span className="bg-hrbooteh-gradient-primary bg-clip-text text-transparent">
-              مهارت‌های حرفه‌ای
+              شایستگی‌های حرفه‌ای
             </span>
           </h1>
           
           <p className="text-xl text-hrbooteh-text-secondary mb-12 max-w-2xl mx-auto leading-relaxed">
-            در hrbooteh، شما یک مسیر هدایت‌شده برای ارزیابی و توسعه مهارت‌های کلیدی حرفه‌ای خود طی می‌کنید. این پلتفرم به شما کمک می‌کند تا نقاط قوت و ضعف خود را شناسایی کرده و برای رشد حرفه‌ای برنامه‌ریزی کنید.
+            در hrbooteh، شما یک مسیر هدایت‌شده برای ارزیابی و توسعه شایستگی‌های کلیدی حرفه‌ای خود طی می‌کنید. این پلتفرم به شما کمک می‌کند تا نقاط قوت و ضعف خود را شناسایی کرده و برای رشد حرفه‌ای برنامه‌ریزی کنید.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -70,7 +70,7 @@ const Index = () => {
                 ارزیابی هدایت‌شده
               </h3>
               <p className="text-hrbooteh-text-secondary leading-relaxed">
-                یک مسیر مشخص و علمی برای ارزیابی مهارت‌های کلیدی حرفه‌ای شما
+                یک مسیر مشخص و علمی برای ارزیابی شایستگی‌های کلیدی حرفه‌ای شما
               </p>
             </Card>
 
@@ -106,11 +106,11 @@ const Index = () => {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-right">
               {[
-                "ارزیابی استقلال",
-                "ارزیابی اعتماد به نفس", 
-                "ارزیابی مهارت‌های مذاکره",
-                "ارزیابی مهارت‌های رهبری",
-                "ارزیابی مهارت‌های ارتباطی",
+                "شایستگی های فنی",
+                "شایستگی های رفتاری", 
+                "شایستگی های فردی",
+                "شایستگی های رهبری و مدیریت",
+                "شایستگی های شناختی",
                 "و موارد بیشتر..."
               ].map((item, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-hrbooteh-surface-elevated rounded-lg">
@@ -129,7 +129,7 @@ const Index = () => {
           <div className="text-center">
             <Logo variant="default" className="mb-4" />
             <p className="text-hrbooteh-text-secondary text-sm">
-              © 2024 hrbooteh. تمام حقوق محفوظ است.
+              © 2025 hrbooteh. تمام حقوق محفوظ است.
             </p>
           </div>
         </div>

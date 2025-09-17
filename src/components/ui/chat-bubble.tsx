@@ -1,5 +1,6 @@
+// فایل کامل: src/components/ui/chat-bubble.tsx
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "./avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar"; // AvatarImage ایمپورت شد
 import { Bot, User } from "lucide-react";
 
 interface ChatBubbleProps {
@@ -17,6 +18,10 @@ export const ChatBubble = ({
   timestamp,
   className 
 }: ChatBubbleProps) => {
+  // آدرس تصاویر آواتارها
+  const userAvatarUrl = "/user-character.png";
+  const aiAvatarUrl = "/ai-character.png";
+
   return (
     <div className={cn(
       "flex gap-3 mb-6 animate-slide-in",
@@ -25,6 +30,12 @@ export const ChatBubble = ({
     )}>
       {/* Avatar */}
       <Avatar className="w-10 h-10 shrink-0">
+        {/* از کامپوننت AvatarImage برای نمایش تصویر استفاده می‌کنیم */}
+        <AvatarImage 
+          src={isUser ? userAvatarUrl : aiAvatarUrl} 
+          alt={isUser ? "User Avatar" : "AI Avatar"} 
+        />
+        {/* AvatarFallback به عنوان جایگزین در صورت لود نشدن تصویر نمایش داده می‌شود */}
         <AvatarFallback className={cn(
           isUser ? "bg-hrbooteh-primary text-hrbooteh-primary-foreground" : "bg-hrbooteh-accent text-hrbooteh-accent-foreground"
         )}>
