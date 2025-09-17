@@ -182,17 +182,7 @@ const NewQuestionnaire = () => {
                 </div>
               </div>
 
-              <div className="space-y-6 p-4 border rounded-lg">
-                <h3 className="text-lg font-medium mb-4">تنظیمات سناریو</h3>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="has_narrator">سناریو راوی داشته باشد؟</Label>
-                  <Switch id="has_narrator" checked={formData.has_narrator} onCheckedChange={(checked) => handleSwitchChange('has_narrator', checked)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="character_count">تعداد کاراکترهای سناریو</Label>
-                  <Input id="character_count" name="character_count" type="number" value={formData.character_count} onChange={handleChange} required min="1" />
-                </div>
-              </div>
+             
 
               <div className="space-y-6 p-4 border rounded-lg">
                 <h3 className="text-lg font-medium mb-4">تنظیمات زمان‌بندی</h3>
