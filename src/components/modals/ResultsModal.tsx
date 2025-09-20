@@ -1,4 +1,4 @@
-// آدرس فایل جدید: src/components/modals/ResultsModal.tsx
+// src/components/modals/ResultsModal.tsx
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ const ResultsModal = ({ isOpen, onClose, assessmentId }: ResultsModalProps) => {
             const fetchResults = async () => {
                 setIsLoading(true);
                 setError(null);
-                setResult(null); // Reset previous result
+                setResult(null);
                 try {
                     const response = await apiFetch(`assessment/results/${assessmentId}`);
                     if (response.success && response.data) {
@@ -75,37 +75,39 @@ const ResultsModal = ({ isOpen, onClose, assessmentId }: ResultsModalProps) => {
         const { score, max_score, description } = result.assessment;
 
         return (
-            <div className="space-y-6">
-                <div className="text-center">
+            <>
+                <DialogHeader>
                     <div className="flex justify-center mb-4">
                         <div className="w-16 h-16 bg-hrbooteh-gradient-primary rounded-full flex items-center justify-center">
                             <Award className="w-8 h-8 text-white" />
                         </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-hrbooteh-text-primary">
+                    <DialogTitle className="text-center text-2xl font-bold text-hrbooteh-text-primary">
                         گزارش نهایی ارزیابی
-                    </h2>
-                    <p className="text-sm text-hrbooteh-text-secondary mt-2">
-                        تبریک! شما مسیر ارزیابی را با موفقیت تکمیل کرده‌اید.
-                    </p>
-                </div>
+                    </DialogTitle>
+                    <DialogDescription className="text-center text-sm text-hrbooteh-text-secondary pt-2">
+                        تبریک! شما این مرحله از ارزیابی را با موفقیت تکمیل کرده‌اید.
+                    </DialogDescription>
+                </DialogHeader>
 
-                <div className="text-center">
-                    <p className="text-hrbooteh-text-primary font-bold text-4xl">{score} <span className="text-lg font-medium text-hrbooteh-text-secondary">/ {max_score}</span></p>
-                    <p className="text-sm text-hrbooteh-text-muted">نمره کل</p>
-                </div>
+                <div className="space-y-6 py-4">
+                    <div className="text-center">
+                        <p className="text-hrbooteh-text-primary font-bold text-4xl">{score} <span className="text-lg font-medium text-hrbooteh-text-secondary">/ {max_score}</span></p>
+                        <p className="text-sm text-hrbooteh-text-muted">نمره کل</p>
+                    </div>
 
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger className="font-semibold text-hrbooteh-text-primary">مشاهده تحلیل کامل</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="prose prose-sm max-w-none text-hrbooteh-text-secondary leading-relaxed pt-2">
-                                <ReactMarkdown>{description}</ReactMarkdown>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-            </div>
+                    <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger className="font-semibold text-hrbooteh-text-primary">مشاهده تحلیل کامل</AccordionTrigger>
+                            <AccordionContent>
+                                <div className="prose prose-sm max-w-none text-hrbooteh-text-secondary leading-relaxed pt-2">
+                                    <ReactMarkdown>{description}</ReactMarkdown>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </div>
+            </>
         );
     };
 
@@ -113,7 +115,7 @@ const ResultsModal = ({ isOpen, onClose, assessmentId }: ResultsModalProps) => {
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-2xl">
                 {renderContent()}
-                <DialogFooter className="mt-6">
+                <DialogFooter className="mt-4">
                     <Button onClick={onClose} variant="hrbooteh" className="w-full">
                         بازگشت به داشبورد
                     </Button>

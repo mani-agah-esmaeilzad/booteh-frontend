@@ -1,11 +1,12 @@
+// src/pages/AssessmentChat.tsx
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatBubble } from "@/components/ui/chat-bubble";
 import { Logo } from "@/components/ui/logo";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowUp, Mic, ArrowLeft, LoaderCircle, Clock } from "lucide-react";
-import { useAssessment } from "@/contexts/assessment-context";
 import apiFetch from "@/services/apiService";
 import { toast } from "sonner";
 
@@ -43,8 +44,6 @@ interface Message {
 }
 
 const AssessmentChat = () => {
-  const { stringId } = useParams<{ stringId: string }>();
-  const { updateAssessmentStatus } = useAssessment();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -62,32 +61,26 @@ const AssessmentChat = () => {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // راه‌اندازی Web Speech API
+  // راه‌اندازی Web Speech API - بهینه‌سازی شده
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
-      toast.warning("مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.");
+      console.warn("مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.");
       return;
     }
 
     const recognition = new SpeechRecognitionAPI();
-    recognition.continuous = true; // به صحبت کردن ادامه می‌دهد تا به صورت دستی متوقف شود
+    recognition.continuous = true;
     recognition.lang = 'fa-IR';
-    recognition.interimResults = true; // نمایش نتایج حین صحبت کردن
+    recognition.interimResults = true;
 
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error", event.error);
-      if (event.error !== 'no-speech') {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
         toast.error(`خطای تشخیص گفتار: ${event.error}`);
       }
       setIsListening(false);
@@ -95,19 +88,24 @@ const AssessmentChat = () => {
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
-      let interimTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
+          finalTranscript += event.results[i][0].transcript + ' ';
         }
       }
-      setInputValue(inputValue + finalTranscript + interimTranscript);
+      // استفاده از آپدیت تابعی برای جلوگیری از وابستگی به inputValue
+      if (finalTranscript) {
+        setInputValue(prev => prev + finalTranscript);
+      }
     };
 
     recognitionRef.current = recognition;
-  }, [inputValue]); // وابستگی به inputValue برای الحاق صحیح متن
+
+    // Cleanup on component unmount
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []); // <-- وابستگی خالی باعث می‌شود این useEffect فقط یک بار اجرا شود.
 
   // مدیریت دریافت اطلاعات اولیه از داشبورد
   useEffect(() => {
@@ -136,6 +134,7 @@ const AssessmentChat = () => {
   // مدیریت تایمر
   useEffect(() => {
     if (!settings?.has_timer) return;
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -146,6 +145,7 @@ const AssessmentChat = () => {
         return prev - 1;
       });
     }, 1000);
+
     return () => clearInterval(timer);
   }, [settings]);
 
@@ -163,7 +163,6 @@ const AssessmentChat = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading || !sessionId || !assessmentId) return;
 
-    // اگر در حال گوش دادن بود، آن را متوقف کن
     if (isListening) {
       recognitionRef.current?.stop();
     }
@@ -191,8 +190,8 @@ const AssessmentChat = () => {
       }
     } catch (err: any) {
       toast.error(err.message);
-      setInputValue(currentInput);
-      setMessages(prev => prev.slice(0, -1));
+      setInputValue(currentInput); // بازگرداندن پیام کاربر در صورت خطا
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id)); // حذف پیام از لیست
     } finally {
       setIsLoading(false);
     }
@@ -211,18 +210,18 @@ const AssessmentChat = () => {
     }
   };
 
-  // تابع برای مدیریت کلیک روی دکمه میکروفون
   const handleMicClick = () => {
-    if (!recognitionRef.current) return;
+    if (!recognitionRef.current) {
+      toast.warning("قابلیت تشخیص گفتار در دسترس نیست.");
+      return;
+    }
 
     if (isListening) {
       recognitionRef.current.stop();
     } else {
-      setInputValue(""); // کادر متن را قبل از شروع پاک کن
       recognitionRef.current.start();
     }
   };
-
 
   return (
     <div className="min-h-screen bg-hrbooteh-background flex flex-col">
@@ -257,10 +256,8 @@ const AssessmentChat = () => {
           {isLoading && (
             <div className="flex justify-start mb-6">
               <div className="bg-hrbooteh-chat-ai border border-hrbooteh-chat-ai-border rounded-xl px-4 py-3 max-w-[80%]">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-hrbooteh-text-muted rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-hrbooteh-text-muted rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-hrbooteh-text-muted rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="flex gap-1 items-center">
+                  <span className="text-sm text-hrbooteh-text-secondary mr-2">...</span>
                 </div>
               </div>
             </div>

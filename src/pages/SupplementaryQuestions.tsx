@@ -1,3 +1,5 @@
+// src/pages/SupplementaryQuestions.tsx
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +10,7 @@ import { LoaderCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import apiFetch from "@/services/apiService";
 import { useAssessment } from "@/contexts/assessment-context";
+import ResultsModal from "@/components/modals/ResultsModal"; // ایمپورت مودال نتایج
 
 interface SupplementaryQuestionsData {
     supplementary_question_1: string;
@@ -17,13 +20,14 @@ interface SupplementaryQuestionsData {
 const SupplementaryQuestions = () => {
     const { assessmentId } = useParams<{ assessmentId: string }>();
     const navigate = useNavigate();
-    const { assessments } = useAssessment();
+    const { updateAssessmentStatus } = useAssessment();
 
     const [questions, setQuestions] = useState<SupplementaryQuestionsData | null>(null);
     const [answers, setAnswers] = useState({ q1: "", q2: "" });
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [timeLeft, setTimeLeft] = useState(5 * 60);
+    const [isModalOpen, setIsModalOpen] = useState(false); // استیت برای کنترل مودال
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -46,6 +50,7 @@ const SupplementaryQuestions = () => {
 
     // تایمر
     useEffect(() => {
+        if (isLoading) return; // تایمر تا وقتی که سوالات لود نشده‌اند، شروع نشود
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
@@ -57,9 +62,10 @@ const SupplementaryQuestions = () => {
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, []);
+    }, [isLoading]);
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
         setIsSubmitting(true);
         try {
             await apiFetch(`assessment/finish/${assessmentId}`, {
@@ -67,17 +73,28 @@ const SupplementaryQuestions = () => {
                 body: JSON.stringify({ supplementary_answers: answers }),
             });
 
-            const assessment = assessments.find(a => a.id.toString() === assessmentId);
-            if (assessment) {
-                navigate(`/transition/${assessment.stringId}`);
-            } else {
-                navigate('/dashboard');
+            // پیدا کردن ارزیابی فعلی برای آپدیت کردن وضعیت آن
+            const assessmentsResponse = await apiFetch('assessment/status');
+            const currentAssessment = assessmentsResponse.data.find((a: any) => a.id.toString() === assessmentId);
+
+            if (currentAssessment) {
+                updateAssessmentStatus(currentAssessment.stringId, 'completed');
             }
+
+            toast.success("پاسخ‌ها با موفقیت ارسال شد!");
+            setIsModalOpen(true); // باز کردن مودال نتایج
+
         } catch (error: any) {
             toast.error("خطا در ارسال پاسخ‌ها: " + error.message);
             setIsSubmitting(false);
         }
     };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        navigate('/dashboard'); // انتقال به داشبورد پس از بستن مودال
+    };
+
 
     if (isLoading) {
         return <div className="flex justify-center items-center h-screen"><LoaderCircle className="animate-spin h-12 w-12" /></div>;
@@ -110,10 +127,17 @@ const SupplementaryQuestions = () => {
                         </div>
                     )}
                     <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full">
-                        {isSubmitting ? <LoaderCircle className="animate-spin" /> : "ارسال و مشاهده نتیجه نهایی"}
+                        {isSubmitting ? <LoaderCircle className="animate-spin" /> : "ارسال و مشاهده نتیجه"}
                     </Button>
                 </CardContent>
             </Card>
+
+            {/* رندر کردن مودال نتایج */}
+            <ResultsModal
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+                assessmentId={assessmentId ? parseInt(assessmentId, 10) : null}
+            />
         </div>
     );
 };

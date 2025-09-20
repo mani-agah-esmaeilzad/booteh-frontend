@@ -66,7 +66,7 @@ export const ProgressTimeline = ({ steps, className }: ProgressTimelineProps) =>
             )}
           </div>
 
-          {/* Resulte Button */}
+          {/* Resulte Button
           <div className="h-10">
            {step.status === "completed" &&(
 
@@ -80,7 +80,7 @@ export const ProgressTimeline = ({ steps, className }: ProgressTimelineProps) =>
               </Button>
             )
               }
-            </div>
+            </div> */}
         </div>
       ))}
     </div>
